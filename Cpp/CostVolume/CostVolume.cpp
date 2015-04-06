@@ -9,6 +9,7 @@
 #include <opencv2/core/operations.hpp>
 #include <opencv2/core/cuda_stream_accessor.hpp>
 #include <opencv2/core/cuda/common.hpp>
+#include <opencv2/cudaimgproc.hpp>
 
 #include "utils/utils.hpp"
 #include "utils/tinyMat.hpp"
@@ -56,7 +57,7 @@ void CostVolume::checkInputs(const cv::Mat& R, const cv::Mat& T,
 #define FLATALLOC(n) n.create(1,rows*cols, CV_32FC1);n=n.reshape(0,rows)
 CostVolume::CostVolume(Mat image, FrameID _fid, int _layers, float _near,
         float _far, cv::Mat R, cv::Mat T, cv::Mat _cameraMatrix,
-        float initialCost, float initialWeight): R(R),T(T),initialWeight(initialWeight),_cuArray() {
+        float initialCost, float initialWeight): R(R),T(T),initialWeight(initialWeight) {
 
     //For performance reasons, OpenDTAM only supports multiple of 32 image sizes with cols >= 64
     CV_Assert(image.rows % 32 == 0 && image.cols % 32 == 0 && image.cols >= 64);
@@ -77,21 +78,23 @@ CostVolume::CostVolume(Mat image, FrameID _fid, int _layers, float _near,
     FLATALLOC(loInd);
     dataContainer.create(layers, rows * cols, CV_32FC1);
 
-    Mat imageGray;
-    cvtColor(image, imageGray, CV_RGB2GRAY);
-
-    baseImage.upload(image.reshape(0,1));
+    Mat bwImage;
+    image=image.reshape(0,1);
+    cv::cvtColor(image, bwImage, CV_RGB2GRAY);
+    baseImage.upload(image);
+    baseImageGray.upload(bwImage);
     baseImage=baseImage.reshape(0,rows);
-
-    baseImage.upload(imageGray.reshape(0,1));
     baseImageGray=baseImageGray.reshape(0,rows);
-
+//    cvStream.enqueueMemSet(loInd,0.0);
+//    cvStream.enqueueMemSet(dataContainer,initialCost);
     data = (float*) dataContainer.data;
     //hitContainer.create(layers, rows * cols, CV_32FC1);
     //hitContainer = initialWeight;
     hits = (float*) hitContainer.data;
     count = 0;
-    
+
+
+
     //messy way to disguise cuda objects
     _cuArray=Ptr<char>((char*)(new cudaArray_t));
     *((cudaArray**)(char*)_cuArray)=0;
@@ -181,16 +184,16 @@ void CostVolume::updateCost(const Mat& _image, const cv::Mat& R, const cv::Mat& 
                 cBuffer.create(_image.rows,_image.cols,CV_8UC4);
                 Mat cm=cBuffer;//.createMatHeader();
                 if(_image.type()==CV_8UC1||_image.type()==CV_8SC1){
-                    cvtColor(_image,cm,CV_GRAY2BGRA);
+                    cv::cvtColor(_image,cm,CV_GRAY2BGRA);
                 }else if(_image.type()==CV_8UC3||_image.type()==CV_8SC3){
-                    cvtColor(_image,cm,CV_BGR2BGRA);
+                    cv::cvtColor(_image,cm,CV_BGR2BGRA);
                 }else{
                     image=_image;
                     if(_image.channels()==1){
-                        cvtColor(image,image,CV_GRAY2BGRA);
+                        cv::cvtColor(image,image,CV_GRAY2BGRA);
                     }
                     if(_image.channels()==3){
-                        cvtColor(image,image,CV_BGR2BGRA);
+                        cv::cvtColor(image,image,CV_BGR2BGRA);
                     }
                     //image is now 4 channel, unknown depth but not 8 bit
                     if(_image.depth()>=5){//float
@@ -282,8 +285,8 @@ CostVolume::~CostVolume(){
     ref.release();
     cout<<"destructor!: "<<*rc<<" arr: "<<cuArray<<endl;
     if(*rc<=0){//no one else has a copy of the cv, so we must clean up
-        assert(cuArray);
-        assert(_cuArray);
+//        assert(cuArray);
+//        assert(_cuArray);
         if (cuArray){
             cudaFreeArray(cuArray);
             cuArray=0;

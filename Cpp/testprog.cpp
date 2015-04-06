@@ -67,8 +67,9 @@ int App_main( int argc, char** argv )
 
     for(int i=0;i<numImg;i++){
         Mat tmp;
-        sprintf(filename,"../../Trajectory_30_seconds/scene_%03d.png",i);
-        convertAhandaPovRayToStandard("../../Trajectory_30_seconds",
+        sprintf(filename,"%s/scene_%03d.png",argv[1],i);
+//        sprintf(filename,"../../Trajectory_30_seconds/scene_%03d.png",i);
+        convertAhandaPovRayToStandard(argv[1],
                                       i,
                                       cameraMatrix,
                                       R,
