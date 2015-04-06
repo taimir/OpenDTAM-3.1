@@ -7,22 +7,17 @@
 #include "CostVolume.cuh"
 
 #include <opencv2/core/operations.hpp>
-#include <opencv2/gpu/stream_accessor.hpp>
-#include <opencv2/gpu/device/common.hpp>
+#include <opencv2/core/cuda_stream_accessor.hpp>
+#include <opencv2/core/cuda/common.hpp>
 
 #include "utils/utils.hpp"
 #include "utils/tinyMat.hpp"
 #include "graphics.hpp"
 #include <iostream>
 
-
 using namespace std;
 using namespace cv;
-using namespace cv::gpu;
-
-
-
-
+using namespace cv::cuda;
 
 void CostVolume::solveProjection(const cv::Mat& R, const cv::Mat& T) {
     Mat P;
@@ -61,7 +56,7 @@ void CostVolume::checkInputs(const cv::Mat& R, const cv::Mat& T,
 #define FLATALLOC(n) n.create(1,rows*cols, CV_32FC1);n=n.reshape(0,rows)
 CostVolume::CostVolume(Mat image, FrameID _fid, int _layers, float _near,
         float _far, cv::Mat R, cv::Mat T, cv::Mat _cameraMatrix,
-        float initialCost, float initialWeight): R(R),T(T),initialWeight(initialWeight),_cuArray(0) {
+        float initialCost, float initialWeight): R(R),T(T),initialWeight(initialWeight),_cuArray() {
 
     //For performance reasons, OpenDTAM only supports multiple of 32 image sizes with cols >= 64
     CV_Assert(image.rows % 32 == 0 && image.cols % 32 == 0 && image.cols >= 64);
@@ -81,14 +76,16 @@ CostVolume::CostVolume(Mat image, FrameID _fid, int _layers, float _near,
     FLATALLOC(hi);
     FLATALLOC(loInd);
     dataContainer.create(layers, rows * cols, CV_32FC1);
-    
-    GpuMat tmp;
+
+    Mat imageGray;
+    cvtColor(image, imageGray, CV_RGB2GRAY);
+
     baseImage.upload(image.reshape(0,1));
-    cvtColor(baseImage,baseImageGray,CV_RGB2GRAY);
     baseImage=baseImage.reshape(0,rows);
+
+    baseImage.upload(imageGray.reshape(0,1));
     baseImageGray=baseImageGray.reshape(0,rows);
-    cvStream.enqueueMemSet(loInd,0.0);
-    cvStream.enqueueMemSet(dataContainer,initialCost);
+
     data = (float*) dataContainer.data;
     //hitContainer.create(layers, rows * cols, CV_32FC1);
     //hitContainer = initialWeight;
@@ -106,7 +103,7 @@ CostVolume::CostVolume(Mat image, FrameID _fid, int _layers, float _near,
 
 
 
-void CostVolume::simpleTex(const Mat& image,Stream cvStream){
+void CostVolume::simpleTex(const Mat& image, Stream cvStream){
     cudaArray_t& cuArray=*((cudaArray_t*)(char*)_cuArray);
     cudaTextureObject_t& texObj=*((cudaTextureObject_t*)(char*)_texObj);
     
@@ -151,10 +148,9 @@ void CostVolume::simpleTex(const Mat& image,Stream cvStream){
    //return texObj;
 }
 
-
 void CostVolume::updateCost(const Mat& _image, const cv::Mat& R, const cv::Mat& T){
-    using namespace cv::gpu::device::dtam_updateCost;
-    localStream = cv::gpu::StreamAccessor::getStream(cvStream);
+    using namespace cv::cuda::dtam_updateCost;
+    localStream = cv::cuda::StreamAccessor::getStream(cvStream);
     
     // 0  1  2  3
     // 4  5  6  7

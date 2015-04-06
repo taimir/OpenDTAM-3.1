@@ -31,7 +31,7 @@ const static bool valgrind=0;
 
 //A test program to make the mapper run
 using namespace cv;
-using namespace cv::gpu;
+using namespace cv::cuda;
 using namespace std;
 
 int App_main( int argc, char** argv );
@@ -85,7 +85,7 @@ int App_main( int argc, char** argv )
         Rs0.push_back(R.clone());
         Ts0.push_back(T.clone());
     }
-    CudaMem cret(images[0].rows,images[0].cols,CV_32FC1);
+    HostMem cret(images[0].rows,images[0].cols,CV_32FC1);
     ret=cret.createMatHeader();
     //Setup camera matrix
     double sx=reconstructionScale;
@@ -117,7 +117,7 @@ int App_main( int argc, char** argv )
     
     int inc=1;
     
-    cv::gpu::Stream s;
+    cv::cuda::Stream s;
     
     for (int imageNum=1;imageNum<numImg;imageNum++){
         if (inc==-1 && imageNum<4){
@@ -145,8 +145,8 @@ int App_main( int argc, char** argv )
             Optimizer optimizer(cv);
             optimizer.initOptimization();
             GpuMat a(cv.loInd.size(),cv.loInd.type());
-//             cv.loInd.copyTo(a,cv.cvStream);
-            cv.cvStream.enqueueCopy(cv.loInd,a);
+             cv.loInd.copyTo(a,cv.cvStream);
+//            cv.cvStream.enqueueCopy(cv.loInd,a);
             GpuMat d;
             denoiser.cacheGValues();
             ret=image*0;
