@@ -85,15 +85,14 @@ CostVolume::CostVolume(Mat image, FrameID _fid, int _layers, float _near,
     baseImageGray.upload(bwImage);
     baseImage=baseImage.reshape(0,rows);
     baseImageGray=baseImageGray.reshape(0,rows);
-//    cvStream.enqueueMemSet(loInd,0.0);
-//    cvStream.enqueueMemSet(dataContainer,initialCost);
+
+    loInd.setTo(Scalar(0, 0, 0),cvStream);
+    dataContainer.setTo(Scalar(initialCost),cvStream);
+
     data = (float*) dataContainer.data;
-    //hitContainer.create(layers, rows * cols, CV_32FC1);
-    //hitContainer = initialWeight;
     hits = (float*) hitContainer.data;
+
     count = 0;
-
-
 
     //messy way to disguise cuda objects
     _cuArray=Ptr<char>((char*)(new cudaArray_t));
