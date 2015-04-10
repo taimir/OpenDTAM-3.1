@@ -22,7 +22,7 @@ sudo apt-get install qtbase5-dev
 #### OpenCV 3
 
 ```bash
-# Execute commands from directory you would like to clone OpenCV
+# Execute first command from directory you would like to clone OpenCV
 git clone https://github.com/Itseez/opencv
 cd opencv
 mkdir build
