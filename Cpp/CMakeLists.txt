@@ -10,7 +10,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g -ggdb")
 find_package(OpenCV 3 REQUIRED)
 find_package(Qt5Core REQUIRED)
 find_package(CUDA REQUIRED)
-find_package(Boost COMPONENTS system thread)
+find_package(Boost REQUIRED COMPONENTS system)
 #add_definitions( -D__OPENCV_BUILD=1 )
 #message(STATUS ${OpenCV_CONSIDERED_CONFIGS})
 
@@ -57,7 +57,7 @@ set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};
   -O3
 )
 cuda_add_library(OpenDTAM SHARED ${DTAM_SOURCES} OpenDTAM.cpp)
-target_link_libraries(OpenDTAM opencv_cudaimgproc opencv_cudastereo)
+target_link_libraries(OpenDTAM opencv_cudaimgproc opencv_cudastereo ${Boost_LIBRARIES})
 add_executable (a.out testprog.cpp convertAhandaPovRayToStandard.cpp graphics.cpp)
 target_link_libraries( a.out  OpenDTAM ${OpenCV_LIBS} ${Boost_LIBRARIES})
 
