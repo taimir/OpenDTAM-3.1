@@ -19,6 +19,20 @@ Tested in this environment
 
 ### Install dependencies
 
+#### qtbase5-dev
+
+```bash
+sudo apt-add-repository ppa:ubuntu-sdk-team/ppa
+sudo apt-get update
+sudo apt-get install qtbase5-dev
+```
+
+#### boost
+
+```bash
+sudo apt-get install libboost-system-dev libboost-thread-dev
+```
+
 #### Cuda
 
 Version 7.5 was used. 
@@ -40,19 +54,6 @@ cmake ../Cpp -DCUDA_NVCC_FLAGS="-D_FORCE_INLINES"
 make -j4
 sudo make install
 ```
-#### qtbase5-dev
-
-```bash
-sudo apt-add-repository ppa:ubuntu-sdk-team/ppa
-sudo apt-get update
-sudo apt-get install qtbase5-dev
-```
-
-#### boost
-
-```bash
-sudo apt-get install libboost-system-dev libboost-thread-dev
-```
 
 ### Build OpenDTAM
 ```bash
@@ -72,12 +73,3 @@ Assuming you are executing this command from the build folder, as shown above, e
 ```bash
 ./a.out ../Trajectory_30_seconds
 ```
-
-### Trouble Shooting
-
-You may have problems with the versions of the dependencies, if so you may be able to resolve them by installing the required ones according to the messages output by `cmake`.
-
-If you encounter errors, send me an email with the output of cmake (something like " -- Detected version of GNU GCC: 46 (406) .......")  
-and also the output of   
-"cmake -L"  
-and I can tell you what you need to do.
