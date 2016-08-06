@@ -1,4 +1,4 @@
-OpenDTAM
+OpenDTAM for Opencv 3.1
 ========
 
 An open source implementation of DTAM
