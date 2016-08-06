@@ -43,14 +43,17 @@ You can use the pre-built downloads from [NVIDIA](https://developer.nvidia.com/c
 
 #### OpenCV 3
 
+These lines were mostly stitched together from the [caffee installation guide](https://github.com/BVLC/caffe/wiki/Ubuntu-16.04-or-15.10-OpenCV-3.1-Installation-Guide "caffe installation guide")
+
 ```bash
 # Execute first command from directory you would like to clone OpenCV
 git clone https://github.com/opencv/opencv.git
-git checkout tags/3.1.0
 cd opencv
+# make sure to use version 3.1.0
+git checkout tags/3.1.0
 mkdir build
 cd build
-cmake ../Cpp -DCUDA_NVCC_FLAGS="-D_FORCE_INLINES"
+cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D WITH_TBB=ON -D WITH_V4L=ON -D WITH_QT=ON -D WITH_OPENGL=ON -DCUDA_NVCC_FLAGS="-D_FORCE_INLINES" ..
 make -j4
 sudo make install
 ```
