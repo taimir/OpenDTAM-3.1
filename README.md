@@ -5,31 +5,47 @@ An open source implementation of DTAM
 
 Based on Newcombe, Richard A., Steven J. Lovegrove, and Andrew J. Davison's "DTAM: Dense tracking and mapping in real-time."
 
-This project depends on qtbase5-dev and [OpenCV 3](https://github.com/Itseez/opencv "OpenCV").
+This project depends on qtbase5-dev, [OpenCV 3](https://github.com/Itseez/opencv "OpenCV") and [Cuda](https://developer.nvidia.com/cuda-downloads "Cuda").
 
-## Build Instructions on Ubuntu 12/14
+## Build Instructions on Ubuntu 16.04
+
+Tested in this environment
+
+* Ubuntu 16.04 x64
+* GCC 5.4.0
+* Boost 1.5.8
+* OpenCV 3.1
+* Cuda Toolkit 7.5
 
 ### Install dependencies
 
+#### Cuda
+
+Version 7.5 was used. 
+
+You can use the pre-built downloads from [NVIDIA](https://developer.nvidia.com/cuda-downloads "Cuda"), or you can follow this guide:
+
+[Cuda Installation Tutorial](https://www.pugetsystems.com/labs/hpc/NVIDIA-CUDA-with-Ubuntu-16-04-beta-on-a-laptop-if-you-just-cannot-wait-775/ "Cuda Installation Tutorial")
+
+#### OpenCV 3
+
+```bash
+# Execute first command from directory you would like to clone OpenCV
+git clone https://github.com/opencv/opencv.git
+git checkout tags/3.1.0
+cd opencv
+mkdir build
+cd build
+cmake ../Cpp -DCUDA_NVCC_FLAGS="-D_FORCE_INLINES"
+make -j4
+sudo make install
+```
 #### qtbase5-dev
 
 ```bash
 sudo apt-add-repository ppa:ubuntu-sdk-team/ppa
 sudo apt-get update
 sudo apt-get install qtbase5-dev
-```
-
-#### OpenCV 3
-
-```bash
-# Execute first command from directory you would like to clone OpenCV
-git clone https://github.com/Itseez/opencv
-cd opencv
-mkdir build
-cd build
-cmake ..
-make -j4
-sudo make install
 ```
 
 #### boost
