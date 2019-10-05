@@ -7,7 +7,7 @@ cmake_policy(SET CMP0012 NEW)
 #message(STATUS ${CMAKE_MODULE_PATH})
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g -ggdb")
 
-find_package(OpenCV 3.1 REQUIRED)
+find_package(OpenCV 3.2 REQUIRED)
 find_package(Qt5Core REQUIRED)
 find_package(CUDA REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system)
@@ -48,9 +48,9 @@ add_subdirectory(Scheduler)
 include_directories("${BASEPATH}" ${CUDA_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
 
 set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};
-  -gencode arch=compute_30,code=sm_30;
-  -gencode arch=compute_35,code=sm_35;
-  -gencode arch=compute_50,code=sm_50;
+  #-gencode arch=compute_30,code=sm_30;
+  #-gencode arch=compute_35,code=sm_35;
+  -gencode arch=compute_61,code=sm_61;
   --use_fast_math;
   --restrict;
   -lineinfo;

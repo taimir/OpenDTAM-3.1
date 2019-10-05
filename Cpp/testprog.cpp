@@ -70,7 +70,7 @@ int App_main( int argc, char** argv )
         cout<<"Opening: "<< filename << endl;
         
         imread(filename, -1).convertTo(image,CV_32FC3,1.0/65535.0);
-        resize(image,image,Size(),reconstructionScale,reconstructionScale);
+        cv::resize(image,image,Size(),reconstructionScale,reconstructionScale);
         
         images.push_back(image.clone());
         Rs.push_back(R.clone());
